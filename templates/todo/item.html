@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="vh-100" style="background-color: #eee;">
+    <div class="container py-5 h100">
+      <div class="row d-flex justify-content-center align-content-center h-100">
+        <div class="col col-lg-9 col-xl-7">
+          <div class="card rounded-3">
+            <div class="card-body p-4">
+              <h4 class="text-center my-3 pb-3">To Do App</h4>
+              <form class="row row-cols-lg-auto g-3 justify-content-center align-content-center mb-4 pb-2" method="POST">
+                {% csrf_token %}
+                <div class="col-12">
+                  <div class="form-outline">
+                    <input type="text" name="title" class="form-control my-2" placeholder="title">
+                    <textarea name="description" id="" cols="30" id="form1" rows="5" class="form-control" placeholder="description"></textarea>
+                    <label class="form-label" for="form1">Enter a task here</label>
+                    <div><button type="submit" class="btn btn-primary">Add Item</button></div>
+                  </div>
+                </div>
+              </form>
+
+              <table class="table mb-4">
+                <thead>
+                  <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">Todo item</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in items.all %}
+                  <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    {% if not item.status %}
+                      <td>{{item.title}}</td>
+                      <td><a href="{% url 'todo:instance' item.id %}">{{item.description|truncatewords:5}}</a></td>
+                      <td class="text-primary">In progress</td>
+                    {% else %}
+                      <td><del>{{item.title}}</del></td>
+                      <td><a href="{% url 'todo:instance' item.id %}">{{item.description|truncatewords:5}}</a></td>
+                      <td class="text-success">Done</td>
+                    {% endif %}
+                    <td>
+                      <form action="{% url 'todo:update_item' todo_item.slug item.id %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger" name="delete">Delete</button>
+                        <button type="submit" class="btn btn-success ms-1" name="update">Finished</button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock content %}

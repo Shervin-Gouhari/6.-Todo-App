@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="vh-100" style="background-color: #eee">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col col-lg-9 col-xl-7">
+          <div class="card rounded-3">
+            <div class="card-body p-4">
+
+              <h4 class="text-center my-3 pb-3">To Do App</h4>
+              <form class="row row-cols-lg-auto g-3 justify-content-center align-items-center mb-4 pb-2" method="POST">
+                {% csrf_token %}
+                <div class="col-12">
+                  <div class="form-outline">
+                    <input type="text" id="title_id" class="form-control" name="title" placeholder="Enter a task here">
+                  </div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+
+              <table class="table mb-4">
+                <thead>
+                  <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">List Title</th>
+                    <th scope="col">Task numbers</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for list in todo_list %}
+                    <tr>
+                      <th scope="row">{{forloop.counter}}</th>
+                      <td>
+                        <a href="{{list.get_absolute_url}}">{{list}}</a>
+                      </td>
+                      <td>{{list.items.all.count}}</td>
+                      <td>
+                        <form action="{% url 'todo:delete_list' list.id %}" method="POST">
+                          {% csrf_token %}
+                          <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              {% if todo_list.has_other_pages %}
+                <div class="container mb-3">
+                  <div class="row">
+                    <div class="col d-flex justify-content-center">
+                      <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                          {% if todo_list.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{todo_list.previous_page_number}}">Previous</a></li>
+                          {% endif %}
+                          {% for page in todo_list.paginator.page_range %}
+                            {% if todo_list.number == page %}
+                              <li class="page-item active"><a style="cursor: default;" class="page-link">{{page}}</a></li>
+                            {% else %}
+                              <li class="page-item"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+                            {% endif %}
+                          {% endfor %}
+                          {% if todo_list.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{todo_list.next_page_number}}">Next</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{todo_list.paginator.num_pages}}">Last</a></li>
+                          {% endif %}
+                        </ul>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock content %}
