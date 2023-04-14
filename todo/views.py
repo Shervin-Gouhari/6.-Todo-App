@@ -5,34 +5,34 @@ from .forms import TodoListForm, TodoItemForm
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, JsonResponse
+
+def pagination(request, object_list):
+    paginator = Paginator(object_list, 8)
+    page_number = request.GET.get('page', '1')
+    try:
+        todo_list = paginator.page(page_number)
+    except PageNotAnInteger:
+        todo_list = paginator.page(1)
+    except EmptyPage:
+        todo_list = paginator.page(paginator.num_pages)
+    return todo_list
 
 @login_required
 def todo_list_view(request):
     if request.method == "POST":
         form = TodoListForm(request.POST)
         if form.is_valid():
-            TodoList.objects.create(**form.cleaned_data, user=request.user)
+            new_list = TodoList.objects.create(**form.cleaned_data, user=request.user)
             object_list = TodoList.objects.filter(user=request.user)
-            paginator = Paginator(object_list, 2)
-            page_number = request.GET.get('page', '1')
-            try:
-                todo_list = paginator.page(page_number)
-            except PageNotAnInteger:
-                todo_list = paginator.page(1)
-            except EmptyPage:
-                todo_list = paginator.page(paginator.num_pages)
+            todo_list = pagination(request, object_list)
             form = TodoListForm()
+            return JsonResponse({"slug": new_list.id,
+                                 "id": new_list.id,
+                                 "count": TodoList.objects.all().count()})
     else:
         object_list = TodoList.objects.filter(user=request.user)
-        paginator = Paginator(object_list, 2)
-        page_number = request.GET.get('page', '1')
-        try:
-            todo_list = paginator.page(page_number)
-        except PageNotAnInteger:
-            todo_list = paginator.page(1)
-        except EmptyPage:
-            todo_list = paginator.page(paginator.num_pages)
+        todo_list = pagination(request, object_list)
         form = TodoListForm()
     return render(request, "todo/list.html", {"todo_list": todo_list, "form": form})
 

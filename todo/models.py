@@ -6,7 +6,7 @@ from accounts.models import CustomRegistrationModel
 
 class TodoList(models.Model):
     class Meta:
-        ordering = ("-slug",)
+        ordering = ("slug",)
         
     title = models.CharField(max_length=300)
     user = models.ForeignKey(CustomRegistrationModel, on_delete=models.CASCADE, related_name="lists")
